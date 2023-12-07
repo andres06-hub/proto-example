@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package cepshared;
+option go_package = "./cepshared";
+
+import "google/protobuf/any.proto";
+import "google/api/annotations.proto";
+import "google/rpc/code.proto";
+
+// General Section - Start
+message Status {
+  int32 code = 1;
+  string message = 2;
+  google.rpc.Code status = 3;
+  repeated google.protobuf.Any details = 4;
+}
+
+message GeneralRequest { string userId = 1; }
+
+message GeneralResponse {
+  bool success = 1;
+  Status error = 2;
+}
+
+// General Section - End
+
+message PlaceRequest {
+  string userId = 1;
+  string address = 2;
+}
+
+message PlaceResponse {
+  bool success = 1;
+  Status error = 2;
+  repeated Location places = 3;
+}
+
+message Location {
+  string streetLine = 1;
+  string secondary = 2;
+  string city = 3;
+  string state = 4;
+  string zipCode = 5;
+  int32 entries = 6;
+}
+
+// Property info section - Start
+message PropertyInfoRequest {
+  string userId = 1;
+  Location location = 2;
+}
+
+message PropertyInfoResponse {
+  PropertyInfo propertyInfo = 1;
+  Status error = 2;
+}
+
+message PropertyInfo {
+  string constructiontype = 1;
+  int32 builingSize = 2;
+  string frameType = 3;
+  string foundationType = 4;
+  string propertySubType = 5;
+  string propertyType = 6;
+  int32 propertyValue = 7;
+  int32 yearBuilt = 8;
+}
+// Property info section - End
+
+// Get Third Party Apis - Start
+
+message ThirdPartyApisResponseData {
+  bool success = 1;
+  ThirdPartyApisData data = 2;
+  Status error = 3;
+}
+
+message ThirdPartyApisData {
+  SmartyCredentials smarty = 1;
+  AttomCredentials attom = 2;
+}
+
+// Get Third Party Apis - End
+
+// Update SmartyCredentials section - Start
+
+message SmartyUpgradeRequestData {
+  string userId = 1;
+  SmartyCredentials credentials = 2;
+}
+
+message SmartyCredentials {
+  bool custom = 1;
+  string authId = 2;
+  string authToken = 3;
+}
+
+// Update SmartyCredentials section - End
+
+// Update AttomCredentials section - Start
+
+message AttomUpgradeRequestData {
+  string userId = 1;
+  AttomCredentials credentials = 2;
+}
+
+message AttomCredentials {
+  bool custom = 1;
+  string apiKey = 2;
+}
+
+// Update AttomCredentials section - End
+
+// SetupEnvironment sectio - Start
+
+message UserSetupRequest { string userId = 1; }
+
+// SetupEnvironment sectio - End
+
+service Cepshared {
+  rpc SetupEnvironment(UserSetupRequest) returns (GeneralResponse);
+  rpc SearchPlaces(PlaceRequest) returns (PlaceResponse);
+  rpc GetPropertyInfo(PropertyInfoRequest) returns (PropertyInfoResponse);
+  rpc GetThirdPartyApis(GeneralRequest) returns (ThirdPartyApisResponseData);
+  rpc UpdateSmartyCredentials(SmartyUpgradeRequestData)
+      returns (GeneralResponse);
+  rpc UpdateAttomCredentials(AttomUpgradeRequestData) returns (GeneralResponse);
+}
